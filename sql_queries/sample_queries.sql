@@ -9,17 +9,11 @@ SELECT COUNT(order_item_id) FROM public.order_items;
 
 -- -- -- Count on all the columns -- -- -- 
 SELECT COUNT(*) FROM departments;
-
 SELECT COUNT(*) FROM categories;
-
 SELECT COUNT(*) FROM products;
-
 SELECT COUNT(*) FROM customers;
-
 SELECT COUNT(*) FROM orders;
-
 SELECT COUNT(*) FROM order_items;
-
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
 
