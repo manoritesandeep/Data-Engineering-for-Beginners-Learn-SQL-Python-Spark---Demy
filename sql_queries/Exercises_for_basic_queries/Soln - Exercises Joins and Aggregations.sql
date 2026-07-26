@@ -12,10 +12,22 @@ SELECT count(*) FROM customers;
 -- ### Exercise 1 - Customer order count
 
 -- Get order count per customer for the month of 2014 January.
-
+-- SELECT * FROM customers;
+-- SELECT * FROM orders;
 -- * Tables - `orders` and `customers`
 -- * Data should be sorted in descending order by count and ascending order by customer id.
 -- * Output should contain `customer_id`, `customer_fname`, `customer_lname` and `customer_order_count`.
+SELECT 
+	c.customer_id, 
+	c.customer_fname,
+	c.customer_lname,
+	count(order_id) as customer_order_count
+FROM orders o
+	JOIN customers c
+		ON o.order_customer_id = c.customer_id 
+WHERE to_char(o.order_date, 'YYYY-MM') = '2014-01'
+GROUP BY 1,2,3
+ORDER BY 4 DESC, 1 ASC;
 
 -- ### Exercise 2 - Dormant Customers
 
@@ -25,18 +37,36 @@ SELECT count(*) FROM customers;
 -- * Data should be sorted in ascending order by `customer_id`
 -- * Output should contain all the fields from `customers`
 -- * Make sure to run below provided validation queries and validate the output.
-
 SELECT count(DISTINCT order_customer_id)
 FROM orders
 WHERE to_char(order_date, 'yyyy-MM') = '2014-01';
 
 SELECT count(*)
 FROM customers;
-
 -- Get the difference
 -- Get the count using solution query, both the difference and this count should match
 
 -- * Hint: You can use `NOT IN` or `NOT EXISTS` or `OUTER JOIN` to solve this problem.
+
+SELECT 12345-4696 -- 7649
+
+SELECT count(DISTINCT c.customer_id)
+FROM customers c
+	LEFT OUTER JOIN orders AS o 
+		ON c.customer_id = o.order_customer_id 
+		AND to_char(o.order_date, 'yyyy-MM') = '2014-01'
+WHERE o.order_customer_id IS NULL;
+
+-- Using NOT IN
+-- Total orders - All order from Jan 2014 			
+SELECT count(*)
+FROM customers AS c
+WHERE c.customer_id NOT IN (
+    SELECT o.order_customer_id
+    FROM orders AS o
+    WHERE o.order_customer_id = c.customer_id
+        AND to_char(order_date, 'yyyy-MM') = '2014-01'
+);
 
 -- ### Exercise 3 - Revenue Per Customer
 
@@ -47,6 +77,21 @@ FROM customers;
 -- * If there are no orders placed by customer, then the corresponding revenue for a given customer should be 0.
 -- * Consider only `COMPLETE` and `CLOSED` orders
 
+-- SELECT * FROM customers;
+
+SELECT  
+	c.customer_id
+	, c.customer_fname
+	, c.customer_lname
+	, ROUND(SUM(oi.order_item_subtotal)::numeric ,2) as customer_revenue
+FROM order_items oi
+	JOIN orders o
+		on oi.order_item_order_id = o.order_id
+	JOIN customers c
+		on o.order_customer_id = c.customer_id
+GROUP BY 1,2,3
+ORDER BY 4 DESC, 1 ASC;
+
 -- ### Exercise 4 - Revenue Per Category
 
 -- Get the revenue generated for each category for the month of 2014 January
@@ -54,6 +99,30 @@ FROM customers;
 -- * Data should be sorted in ascending order by `category_id`.
 -- * Output should contain all the fields from `categories` along with the revenue as `category_revenue`.
 -- * Consider only `COMPLETE` and `CLOSED` orders
+SELECT c.category_id,
+    c.category_department_id,
+    c.category_name,
+    round(sum(oi.order_item_subtotal)::numeric, 2) AS category_revenue
+FROM categories AS c
+    JOIN products AS p
+        ON c.category_id = p.product_category_id
+    JOIN order_items AS oi
+        ON p.product_id = oi.order_item_product_id
+    JOIN orders AS o
+        ON o.order_id = oi.order_item_order_id
+WHERE o.order_status IN ('COMPLETE', 'CLOSED')
+    AND to_char(o.order_date, 'yyyy-MM') = '2014-01'
+GROUP BY 1, 2, 3
+ORDER BY 1;
+
+SELECT count(DISTINCT product_category_id)
+FROM products AS p
+    JOIN order_items AS oi
+        ON p.product_id = oi.order_item_product_id
+    JOIN orders AS o
+        ON o.order_id = oi.order_item_order_id
+WHERE o.order_status IN ('COMPLETE', 'CLOSED')
+    AND to_char(o.order_date, 'yyyy-MM') = '2014-01';
 
 -- ### Exercise 5 - Product Count Per Department
 
@@ -61,7 +130,16 @@ FROM customers;
 -- * Tables - `departments`, `categories`, `products`
 -- * Data should be sorted in ascending order by `department_id`
 -- * Output should contain all the fields from `departments` and the product count as `product_count`
-
+SELECT d.department_id,
+    d.department_name,
+    count(*) AS department_count
+FROM departments AS d
+    JOIN categories AS c
+        ON d.department_id = c.category_department_id
+    JOIN products AS p
+        ON c.category_id = p.product_category_id
+GROUP BY 1, 2
+ORDER BY 1;
 
 
 
