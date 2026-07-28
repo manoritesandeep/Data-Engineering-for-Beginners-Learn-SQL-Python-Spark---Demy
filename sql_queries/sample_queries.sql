@@ -80,13 +80,15 @@ FROM orders o
 WHERE o.order_id = 2
 GROUP BY o.order_id, o.order_date, o.order_customer_id, o.order_status;
 
-
-
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+DROP INDEX orders_order_date_idx;
+DROP INDEX order_items_oid_idx;
 
+COMMIT;
 
-
+ALTER TABLE order_items ADD
+	FOREIGN KEY (order_item_order_id) REFERENCES orders (order_id);
 
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
