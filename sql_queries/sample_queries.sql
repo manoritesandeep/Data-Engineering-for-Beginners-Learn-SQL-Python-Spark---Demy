@@ -68,8 +68,17 @@ GROUP BY 1;
 SELECT * FROM daily_revenue;
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+EXPLAIN 
+SELECT * FROM orders WHERE order_id=2;
 
-
+EXPLAIN 
+SELECT o.*
+	, ROUND(SUM(oi.order_item_subtotal)::numeric ,2) as revenue
+FROM orders o
+	JOIN order_items oi
+		ON o.order_id = oi.order_item_order_id
+WHERE o.order_id = 2
+GROUP BY o.order_id, o.order_date, o.order_customer_id, o.order_status;
 
 
 
